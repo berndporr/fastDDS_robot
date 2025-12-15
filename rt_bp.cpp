@@ -72,7 +72,7 @@ float RtBP::doSyncStep(cv::Mat img_bgr, float error, bool doLearn)
     auto data = model.preprocess(img_bgr);
 
     // forward pass
-    auto output = model.forward(data);
+    auto output = model.forward(data.unsqueeze(0)).squeeze();
 
     // do we learn?
     if (doLearn)
