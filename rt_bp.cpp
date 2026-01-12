@@ -18,18 +18,12 @@ RtBP::RtBP()
     }
     torch::Device device(device_type);
 
-    // Load the pre-trained weights.
-    model.load_torchvision_weights(pretrained_weights_file);
-
     // Replace the standard classifier by this custom one with
     // only two categories for cats and dogs.
     auto newClassifier = torch::nn::Sequential(
         torch::nn::Dropout(0.2),
         torch::nn::Linear(model.getNinputChannelsOfClassifier(), nClasses));
     model.replaceClassifier(newClassifier);
-
-    // Freeze the feature detectors.
-    model.setFeaturesLearning(false);
 
     optimizer = new torch::optim::SGD(model.getClassifier()->parameters(), 0);
 

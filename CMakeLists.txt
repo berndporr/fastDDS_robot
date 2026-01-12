@@ -63,7 +63,32 @@ target_link_libraries(remote fastcdr fastrtps FastDDSMsg)
 add_library(rt_bp STATIC rt_bp.cpp)
 
 add_executable (test_rt_bp test_rt_bp.cpp rt_bp.cpp)
-target_link_libraries(test_rt_bp rt_bp ${TORCH_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(test_rt_bp rt_bp 
+  ${TORCH_LIBRARIES} 
+  ${OpenCV_LIBRARIES}
+      extension_tensor
+    extension_module
+    extension_data_loader
+    extension_flat_tensor
+    executorch
+    executorch_core
+
+    # XNNPACK backend
+    "$<LINK_LIBRARY:WHOLE_ARCHIVE,xnnpack_backend>"
+
+    # XNNPACK dependencies
+    XNNPACK
+
+    xnnpack-microkernels-prod
+
+    pthreadpool
+    extension_threadpool
+
+    quantized_kernels
+    quantized_ops_lib
+    kernels_util_all_deps
+    cpuinfo
+  )
 
 
 ##################

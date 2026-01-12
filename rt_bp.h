@@ -8,9 +8,7 @@
 #include <opencv2/opencv.hpp>
 #include <torch/torch.h>
 #include <thread>
-#include "mobilenet_v2.h"
-
-const char pretrained_weights_file[] = "mobilenet_v2.pt";
+#include "mobilenet_v2q.h"
 
 class RtBP
 {
@@ -37,7 +35,7 @@ public:
 private:
 	void worker(cv::Mat img, float error, bool doLearn);
 
-	MobileNetV2 model;
+	MobileNetV2q model;
 	torch::optim::SGD *optimizer = nullptr;
 	std::thread thr;
 	std::atomic<bool> isRunning = false;
