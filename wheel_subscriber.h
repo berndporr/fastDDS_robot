@@ -16,10 +16,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "brakePubSubTypes.h"
-#include "steeringPubSubTypes.h"
-#include "throttlePubSubTypes.h"
-#include "buttonPubSubTypes.h"
+#include "brakePubSubTypes.hpp"
+#include "steeringPubSubTypes.hpp"
+#include "throttlePubSubTypes.hpp"
+#include "buttonPubSubTypes.hpp"
 
 #include "logiwheel.h"
 
@@ -72,7 +72,7 @@ private:
 	    {
 		SampleInfo info;
 		SteeringMsg msg;
-		if (reader->take_next_sample(&msg, &info) == ReturnCode_t::RETCODE_OK)
+		if (reader->take_next_sample(&msg, &info) == eprosima::fastdds::dds::RETCODE_OK)
 		{
 		    if (callback && info.valid_data) callback(msg.steering());
 		}
@@ -92,7 +92,7 @@ private:
 	    {
 		SampleInfo info;
 		ThrottleMsg msg;
-		if (reader->take_next_sample(&msg, &info) == ReturnCode_t::RETCODE_OK)
+		if (reader->take_next_sample(&msg, &info) == eprosima::fastdds::dds::RETCODE_OK)
 		{
 		    if (callback && info.valid_data) callback(msg.throttle());
 		}
@@ -112,7 +112,7 @@ private:
 	    {
 		SampleInfo info;
 		ButtonMsg msg;
-		if (reader->take_next_sample(&msg, &info) == ReturnCode_t::RETCODE_OK)
+		if (reader->take_next_sample(&msg, &info) == eprosima::fastdds::dds::RETCODE_OK)
 		{
 		    if (callback && info.valid_data) callback(msg.index());
 		}

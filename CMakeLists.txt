@@ -8,14 +8,14 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 project(rt_bp_robot LANGUAGES CXX)
 include(GNUInstallDirs)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 add_compile_options(-Wall)
 
 find_package (Curses)
 
 find_package(fastcdr REQUIRED)
-find_package(fastrtps REQUIRED)
+find_package(fastdds REQUIRED)
 find_package(Torch REQUIRED)
 find_package(OpenCV REQUIRED)
 pkg_check_modules(LIBCAMERA IMPORTED_TARGET libcamera)
@@ -37,14 +37,11 @@ set(LIBDDSIDL ${CMAKE_SOURCE_DIR}/brake.idl  ${CMAKE_SOURCE_DIR}/steering.idl  $
 
 execute_process(COMMAND fastddsgen ${LIBDDSIDL})
 
+file(GLOB DDS_SOURCES_CXX "*.cxx")
 add_library(FastDDSMsg STATIC
-	      brake.cxx brakePubSubTypes.cxx
-	      steering.cxx steeringPubSubTypes.cxx
-	      throttle.cxx throttlePubSubTypes.cxx
-	      button.cxx buttonPubSubTypes.cxx
-	      )
+		       ${DDS_SOURCES_CXX})
 
-target_link_libraries(FastDDSMsg fastcdr fastrtps)
+target_link_libraries(FastDDSMsg fastdds fastcdr)
 
 add_custom_target(
     ddsmessages
@@ -55,15 +52,13 @@ add_dependencies(FastDDSMsg ddsmessages)
 
 # Publisher
 add_executable(remote remote.cpp)
-target_link_libraries(remote fastcdr fastrtps FastDDSMsg)
+target_link_libraries(remote fastdds fastcdr FastDDSMsg)
 
 
 ###################
 # Torch / RT learner
 add_library(rt_bp STATIC rt_bp.cpp)
-
-add_executable (test_rt_bp test_rt_bp.cpp rt_bp.cpp)
-target_link_libraries(test_rt_bp rt_bp 
+target_link_libraries(rt_bp
   ${TORCH_LIBRARIES} 
   ${OpenCV_LIBRARIES}
       extension_tensor
@@ -91,6 +86,10 @@ target_link_libraries(test_rt_bp rt_bp
   )
 
 
+add_executable (test_rt_bp test_rt_bp.cpp)
+target_link_libraries(test_rt_bp rt_bp)
+
+
 ##################
 # Main stuff
 
@@ -100,11 +99,11 @@ if(LIBCAMERA_FOUND)
   include_directories(${LIBCAMERA_INCLUDE_DIRS})
   add_compile_definitions(HAVE_LIBCAMERA)
   add_executable (rt_bp_robot rt_bp_robot.cpp)
-  target_link_libraries(rt_bp_robot rt_bp alphabot ncurses rt FastDDSMsg ${TORCH_LIBRARIES} ${OpenCV_LIBRARIES} PkgConfig::LIBCAMERA cam2opencv)
+  target_link_libraries(rt_bp_robot rt_bp alphabot ncurses rt FastDDSMsg ${TORCH_LIBRARIES} ${OpenCV_LIBRARIES} PkgConfig::LIBCAMERA cam2opencv gpiodcxx)
   add_executable (testIO testIO.cpp)
-  target_link_libraries(testIO alphabot ncurses rt)
+  target_link_libraries(testIO alphabot ncurses rt gpiodcxx)
   add_executable (testMotor testMotor.cpp)
-  target_link_libraries(testMotor alphabot ncurses rt)
+  target_link_libraries(testMotor alphabot ncurses rt gpiodcxx)
 else()
   message(STATUS "libcamera not found — disabling rt_bp_robot")
 endif()

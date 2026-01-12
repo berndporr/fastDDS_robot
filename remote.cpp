@@ -1,5 +1,5 @@
 // Copyright 2016 Proyectos y Sistemas de Mantenimiento SL (eProsima).
-// Copyright 2025 Bernd Porr
+// Copyright 2025-2026 Bernd Porr
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "brakePubSubTypes.h"
-#include "steeringPubSubTypes.h"
-#include "throttlePubSubTypes.h"
-#include "buttonPubSubTypes.h"
+#include "brakePubSubTypes.hpp"
+#include "steeringPubSubTypes.hpp"
+#include "throttlePubSubTypes.hpp"
+#include "buttonPubSubTypes.hpp"
 
 #include <chrono>
 #include <thread>
