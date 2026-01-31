@@ -50,11 +50,6 @@ add_custom_target(
 
 add_dependencies(FastDDSMsg ddsmessages)
 
-# Publisher
-add_executable(remote remote.cpp)
-target_link_libraries(remote fastdds fastcdr FastDDSMsg)
-
-
 ###################
 # Torch / RT learner
 add_library(rt_bp STATIC rt_bp.cpp)

@@ -13,10 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "brakePubSubTypes.hpp"
-#include "steeringPubSubTypes.hpp"
-#include "throttlePubSubTypes.hpp"
-#include "buttonPubSubTypes.hpp"
+#include "brakePubSubTypes.h"
+#include "steeringPubSubTypes.h"
+#include "throttlePubSubTypes.h"
+#include "buttonPubSubTypes.h"
 
 #include <chrono>
 #include <thread>
