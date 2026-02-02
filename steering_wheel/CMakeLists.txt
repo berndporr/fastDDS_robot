@@ -45,5 +45,5 @@ add_custom_target(
 add_dependencies(FastDDSMsg ddsmessages)
 
 # Publisher
-add_executable(remote remote.cpp)
-target_link_libraries(remote fastcdr fastrtps FastDDSMsg)
+add_executable(steering_wheel steering_wheel.cpp)
+target_link_libraries(steering_wheel fastcdr fastrtps FastDDSMsg)
