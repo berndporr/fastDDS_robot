@@ -21,7 +21,7 @@
 #include "throttlePubSubTypes.hpp"
 #include "buttonPubSubTypes.hpp"
 
-#include "remote/logiwheel.h"
+#include "steering_wheel/logiwheel.h"
 
 #include <chrono>
 #include <thread>
