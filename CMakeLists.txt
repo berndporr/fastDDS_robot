@@ -78,6 +78,7 @@ target_link_libraries(rt_bp
     quantized_ops_lib
     kernels_util_all_deps
     cpuinfo
+    kleidiai
   )
 
 
