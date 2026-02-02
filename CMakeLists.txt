@@ -93,8 +93,13 @@ if(LIBCAMERA_FOUND)
   message(STATUS "libcamera found — building RPI stuff")
   include_directories(${LIBCAMERA_INCLUDE_DIRS})
   add_compile_definitions(HAVE_LIBCAMERA)
+
   add_executable (rt_bp_robot rt_bp_robot.cpp)
   target_link_libraries(rt_bp_robot rt_bp alphabot ncurses rt FastDDSMsg ${TORCH_LIBRARIES} ${OpenCV_LIBRARIES} PkgConfig::LIBCAMERA cam2opencv gpiodcxx)
+
+  add_executable (manual_robot manual_robot.cpp)
+  target_link_libraries(manual_robot alphabot ncurses rt FastDDSMsg ${OpenCV_LIBRARIES} PkgConfig::LIBCAMERA cam2opencv gpiodcxx)
+
   add_executable (testIO testIO.cpp)
   target_link_libraries(testIO alphabot ncurses rt gpiodcxx)
   add_executable (testMotor testMotor.cpp)

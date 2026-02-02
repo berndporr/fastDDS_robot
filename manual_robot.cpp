@@ -67,16 +67,25 @@ struct CameraCallback : Libcam2OpenCV::Callback
 {
 	virtual void hasFrame(const cv::Mat &frame, const libcamera::ControlList &)
 	{
-	    frameNumber++;
-	    if (savingFrame) return;
-	    savingFrame = true;
 	    char tmp[256];
+	    if (savingFrame) {
+		nMissedFrames++;
+		sprintf(tmp,
+			"missedFrames = %d    ", nMissedFrames);
+		mvaddstr(missedFramesRowNo, 0, tmp);
+		refresh();
+		return;
+	    }
+	    mvaddstr(missedFramesRowNo, 0, "missedFrames = 0           ");
+	    savingFrame = true;
 	    sprintf(tmp,"/tmp/frame%05d.png",frameNumber);
-	    imwrite(tmp, save_img);
+	    cv::imwrite(tmp, frame);
+	    frameNumber++;
 	    savingFrame = false;
 	}
     std::atomic<bool> savingFrame = false;
     int frameNumber = 0;
+    int nMissedFrames = 0;
 };
 
 int main(int, char **)
@@ -96,7 +105,6 @@ int main(int, char **)
 	}
 	mysub.registerSteeringCallback([&](float s)
 	    {
-	    cameraCallbackAIlogic.manualSteering = s;
 		robotController.setSteering(s);
 		char tmp[256];
 		sprintf(tmp,"Steering: %f",s);
@@ -110,7 +118,7 @@ int main(int, char **)
 		mvaddstr(missedFramesRowNo, 0, tmp);
 	    });
 
-	camera.registerCallback(&cameraCallbackAIlogic);
+	camera.registerCallback(&cameraCallback);
 
 	// create an instance of the settings
 	Libcam2OpenCVSettings settings;
