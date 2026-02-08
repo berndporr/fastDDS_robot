@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.0)
+cmake_minimum_required(VERSION 3.20.0)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
@@ -15,7 +15,7 @@ add_compile_options(-Wall)
 find_package (Curses)
 
 find_package(fastcdr REQUIRED)
-find_package(fastdds REQUIRED)
+find_package(fastdds QUIET)
 find_package(Torch REQUIRED)
 find_package(OpenCV REQUIRED)
 pkg_check_modules(LIBCAMERA IMPORTED_TARGET libcamera)
@@ -33,22 +33,26 @@ include(GNUInstallDirs)
 ###########
 # DDS
 
-set(LIBDDSIDL ${CMAKE_SOURCE_DIR}/brake.idl  ${CMAKE_SOURCE_DIR}/steering.idl  ${CMAKE_SOURCE_DIR}/throttle.idl ${CMAKE_SOURCE_DIR}/button.idl)
+if(fastdds_FOUND)
 
-execute_process(COMMAND fastddsgen ${LIBDDSIDL})
+  set(LIBDDSIDL ${CMAKE_SOURCE_DIR}/brake.idl  ${CMAKE_SOURCE_DIR}/steering.idl  ${CMAKE_SOURCE_DIR}/throttle.idl ${CMAKE_SOURCE_DIR}/button.idl)
 
-file(GLOB DDS_SOURCES_CXX "*.cxx")
-add_library(FastDDSMsg STATIC
+  execute_process(COMMAND fastddsgen ${LIBDDSIDL})
+
+  file(GLOB DDS_SOURCES_CXX "*.cxx")
+  add_library(FastDDSMsg STATIC
 		       ${DDS_SOURCES_CXX})
 
-target_link_libraries(FastDDSMsg fastdds fastcdr)
+  target_link_libraries(FastDDSMsg fastdds fastcdr)
 
-add_custom_target(
+  add_custom_target(
     ddsmessages
     COMMAND fastddsgen ${LIBDDSIDL}
-)
+  )
 
-add_dependencies(FastDDSMsg ddsmessages)
+  add_dependencies(FastDDSMsg ddsmessages)
+
+endif()
 
 ###################
 # Torch / RT learner
@@ -78,8 +82,9 @@ target_link_libraries(rt_bp
     quantized_ops_lib
     kernels_util_all_deps
     cpuinfo
-    kleidiai
-  )
+    $<$<OR:$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},aarch64>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},armv7l>>:kleidiai>
+    extension_named_data_map
+)
 
 
 add_executable (test_rt_bp test_rt_bp.cpp)
@@ -95,11 +100,13 @@ if(LIBCAMERA_FOUND)
   include_directories(${LIBCAMERA_INCLUDE_DIRS})
   add_compile_definitions(HAVE_LIBCAMERA)
 
-  add_executable (rt_bp_robot rt_bp_robot.cpp)
-  target_link_libraries(rt_bp_robot rt_bp alphabot ncurses rt FastDDSMsg ${TORCH_LIBRARIES} ${OpenCV_LIBRARIES} PkgConfig::LIBCAMERA cam2opencv gpiodcxx)
+  if(fastdds_FOUND)
+    add_executable (rt_bp_robot rt_bp_robot.cpp)
+    target_link_libraries(rt_bp_robot rt_bp alphabot ncurses rt FastDDSMsg ${TORCH_LIBRARIES} ${OpenCV_LIBRARIES} PkgConfig::LIBCAMERA cam2opencv gpiodcxx)
 
-  add_executable (manual_robot manual_robot.cpp)
-  target_link_libraries(manual_robot alphabot ncurses rt FastDDSMsg ${OpenCV_LIBRARIES} PkgConfig::LIBCAMERA cam2opencv gpiodcxx)
+    add_executable (manual_robot manual_robot.cpp)
+    target_link_libraries(manual_robot alphabot ncurses rt FastDDSMsg ${OpenCV_LIBRARIES} PkgConfig::LIBCAMERA cam2opencv gpiodcxx)
+  endif()
 
   add_executable (testIO testIO.cpp)
   target_link_libraries(testIO alphabot ncurses rt gpiodcxx)
