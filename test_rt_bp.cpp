@@ -17,7 +17,7 @@ int main(int, char **)
     for(int i = 0; i < n; i++ ) {
 	float err = (float)i / (float)n - 0.5;
 	steering = rtbp.doSyncStep(img,err,true);
-	printf("Err = %f, Steering = %f\r",err,steering);
+	printf("Err = %f, Steering = %f\n",err,steering);
     }
     printf("\n");
     auto stop = std::chrono::high_resolution_clock::now();

@@ -21,7 +21,6 @@ public:
 		Steerer()
 		{
 			sequ = torch::nn::Sequential(
-				torch::nn::Dropout(0.2),
 				torch::nn::Linear(MobileNetV2qFeatures::N_OUTPUT_FEATURES, 2));
 
 			register_module(classifierModuleName, sequ);

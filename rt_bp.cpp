@@ -64,7 +64,7 @@ float RtBP::doSyncStep(cv::Mat img_bgr, float error, bool doLearn)
     // det features
     const auto features_batch = model.forward(input_batch);
     // calc steering
-    const auto steering_batch = steerer.sequ->forward(features_batch);
+    const auto steering_batch = torch::relu(steerer.sequ->forward(features_batch));
 
     const auto steering_output = steering_batch.squeeze();
 
