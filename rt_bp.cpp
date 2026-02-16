@@ -18,14 +18,7 @@ RtBP::RtBP()
     }
     torch::Device device(device_type);
 
-    // Replace the standard classifier by this custom one with
-    // only two categories for cats and dogs.
-    auto newClassifier = torch::nn::Sequential(
-        torch::nn::Dropout(0.2),
-        torch::nn::Linear(model.getNinputChannelsOfClassifier(), nClasses));
-    model.replaceClassifier(newClassifier);
-
-    optimizer = new torch::optim::SGD(model.getClassifier()->parameters(), 0);
+    optimizer = new torch::optim::SGD(steerer.sequ->parameters(), 0);
 
     // Send the model to the CPU or GPU
     model.to(device);
@@ -65,20 +58,27 @@ float RtBP::doSyncStep(cv::Mat img_bgr, float error, bool doLearn)
 {
     auto data = model.preprocess(img_bgr);
 
-    // forward pass
-    auto output = model.forward(data.unsqueeze(0)).squeeze();
+    // turn it into a batch
+    const auto input_batch = data.unsqueeze(0);
+
+    // det features
+    const auto features_batch = model.forward(input_batch);
+    // calc steering
+    const auto steering_batch = steerer.sequ->forward(features_batch);
+
+    const auto steering_output = steering_batch.squeeze();
 
     // do we learn?
     if (doLearn)
     {
         optimizer->zero_grad();
         torch::Tensor gradient = torch::tensor({error, error});
-        output.retain_grad();
-        output.backward(gradient);
+        steering_output.retain_grad();
+        steering_output.backward(gradient);
         optimizer->step();
     }
 
     // one dim output tensor
-    auto a = output.accessor<float, 1>();
+    auto a = steering_output.accessor<float, 1>();
     return a[0] - a[1];
 }
