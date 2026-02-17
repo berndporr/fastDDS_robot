@@ -8,7 +8,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 project(rt_bp_robot LANGUAGES CXX)
 include(GNUInstallDirs)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 add_compile_options(-Wall)
 
@@ -60,7 +60,7 @@ add_library(rt_bp STATIC rt_bp.cpp)
 target_link_libraries(rt_bp
   ${TORCH_LIBRARIES} 
   ${OpenCV_LIBRARIES}
-      extension_tensor
+    extension_tensor
     extension_module
     extension_data_loader
     extension_flat_tensor
