@@ -5,30 +5,13 @@ RtBP::RtBP()
 {
     torch::manual_seed(1);
 
-    torch::DeviceType device_type;
-    if (torch::cuda::is_available())
-    {
-        std::cout << "CUDA available! Training on GPU." << std::endl;
-        device_type = torch::kCUDA;
-    }
-    else
-    {
-        std::cout << "Training on CPU." << std::endl;
-        device_type = torch::kCPU;
-    }
-    torch::Device device(device_type);
-
-    optimizer = new torch::optim::SGD(steerer.sequ->parameters(), 0);
-
-    // Send the model to the CPU or GPU
-    model.to(device);
+    optimizer = std::make_shared<torch::optim::SGD>(steerer.sequ->parameters(), 0);
 }
 
 RtBP::~RtBP()
 {
     if (thr.joinable())
         thr.join();
-    delete optimizer;
 }
 
 void RtBP::worker(cv::Mat img, float error, bool doLearn)
@@ -56,13 +39,13 @@ bool RtBP::doAsyncStep(cv::Mat img, float error, bool doLearn)
 
 float RtBP::doSyncStep(cv::Mat img_bgr, float error, bool doLearn)
 {
-    auto data = model.preprocess(img_bgr);
+    auto data = features.preprocess(img_bgr);
 
     // turn it into a batch
     const auto input_batch = data.unsqueeze(0);
 
     // det features
-    const auto features_batch = model.forward(input_batch);
+    const auto features_batch = features.forward(input_batch);
     // calc steering
     const auto steering_batch = torch::relu(steerer.sequ->forward(features_batch));
 

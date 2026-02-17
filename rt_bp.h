@@ -56,9 +56,9 @@ public:
 private:
 	void worker(cv::Mat img, float error, bool doLearn);
 
-	MobileNetV2qFeatures model;
+	MobileNetV2qFeatures features;
 	Steerer steerer;
-	torch::optim::SGD *optimizer = nullptr;
+	std::shared_ptr<torch::optim::SGD> optimizer;
 	std::thread thr;
 	std::atomic<bool> isRunning = false;
 	// Path to the pretrained weights file
