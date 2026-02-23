@@ -127,4 +127,3 @@ if(LIBCAMERA_FOUND)
 else()
   message(STATUS "libcamera not found — disabling rt_bp_robot")
 endif()
-

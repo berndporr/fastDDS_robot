@@ -20,18 +20,11 @@ public:
 		const char *classifierModuleName = "Steerer";
 		Steerer()
 		{
-			sequ = torch::nn::Sequential(
-				torch::nn::Linear(MobileNetV2qFeatures::N_OUTPUT_FEATURES, 2));
-
+			auto l = torch::nn::Linear(MobileNetV2qFeatures::N_OUTPUT_FEATURES, 2);
+			sequ = torch::nn::Sequential(l);
 			register_module(classifierModuleName, sequ);
-			for (auto &module : sequ->modules(/*include_self=*/false))
-			{
-				if (auto M = dynamic_cast<torch::nn::LinearImpl *>(module.get()))
-				{
-					torch::nn::init::normal_(M->weight, 0.0, 0.01);
-					torch::nn::init::zeros_(M->bias);
-				}
-			}
+			torch::nn::init::normal_(l->weight, 0.0, 0.01);
+			torch::nn::init::zeros_(l->bias);
 		}
 		torch::nn::Sequential sequ{nullptr};
 	};
