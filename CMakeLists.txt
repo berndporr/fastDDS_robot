@@ -30,6 +30,35 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 include(GNUInstallDirs)
 
+set(EXECUTORCH_LINK_LIBS 
+  ${TORCH_LIBRARIES} 
+  ${OpenCV_LIBRARIES}
+    extension_tensor
+    extension_module
+    extension_data_loader
+    extension_flat_tensor
+    executorch
+    executorch_core
+
+    # XNNPACK backend
+    "$<LINK_LIBRARY:WHOLE_ARCHIVE,xnnpack_backend>"
+
+    # XNNPACK dependencies
+    XNNPACK
+
+    xnnpack-microkernels-prod
+
+    pthreadpool
+    extension_threadpool
+
+    quantized_kernels
+    quantized_ops_lib
+    kernels_util_all_deps
+    cpuinfo
+    $<$<OR:$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},aarch64>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},armv7l>>:kleidiai>
+    extension_named_data_map
+)
+
 ###########
 # DDS
 
@@ -54,72 +83,25 @@ if(fastdds_FOUND)
 
 endif()
 
-add_executable (test_rt_bp test_rt_bp.cpp)
-
-###################
-# Torch / RT learner
+############################
+# Torch / RT learner library
 add_library(rt_bp STATIC rt_bp.cpp)
+
+################
+# Tests learning
+add_executable (test_rt_bp test_rt_bp.cpp)
 target_link_libraries(test_rt_bp
   rt_bp
-  ${TORCH_LIBRARIES} 
-  ${OpenCV_LIBRARIES}
-    extension_tensor
-    extension_module
-    extension_data_loader
-    extension_flat_tensor
-    executorch
-    executorch_core
+  ${EXECUTORCH_LINK_LIBS}
+  )
 
-    # XNNPACK backend
-    "$<LINK_LIBRARY:WHOLE_ARCHIVE,xnnpack_backend>"
-
-    # XNNPACK dependencies
-    XNNPACK
-
-    xnnpack-microkernels-prod
-
-    pthreadpool
-    extension_threadpool
-
-    quantized_kernels
-    quantized_ops_lib
-    kernels_util_all_deps
-    cpuinfo
-    $<$<OR:$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},aarch64>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},armv7l>>:kleidiai>
-    extension_named_data_map
-)
-
-target_link_libraries(test_rt_bp rt_bp)
-
+########################
+# Tests loading features
 add_executable (test_features test_features.cpp)
-target_link_libraries(test_features
-  ${TORCH_LIBRARIES} 
-  ${OpenCV_LIBRARIES}
-    extension_tensor
-    extension_module
-    extension_data_loader
-    extension_flat_tensor
-    executorch
-    executorch_core
-
-    # XNNPACK backend
-    "$<LINK_LIBRARY:WHOLE_ARCHIVE,xnnpack_backend>"
-
-    # XNNPACK dependencies
-    XNNPACK
-
-    xnnpack-microkernels-prod
-
-    pthreadpool
-    extension_threadpool
-
-    quantized_kernels
-    quantized_ops_lib
-    kernels_util_all_deps
-    cpuinfo
-    $<$<OR:$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},aarch64>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},armv7l>>:kleidiai>
-    extension_named_data_map
+target_link_libraries(test_features 
+  ${EXECUTORCH_LINK_LIBS}
 )
+
 
 ##################
 # Main stuff

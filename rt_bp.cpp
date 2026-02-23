@@ -85,7 +85,7 @@ bool RtBP::doAsyncStep(cv::Mat img, float error, bool doLearn)
 
 float RtBP::doSyncStep(cv::Mat img_bgr, float error, bool doLearn)
 {
-    const at::Tensor data = MobileNetV2qFeatures::preprocess(img_bgr).to(torch::kCPU);
+    const at::Tensor data = MobileNetV2qFeatures::preprocess(img_bgr);
 
     // turn it into a batch
     const at::Tensor input_batch = data.unsqueeze(0);
@@ -93,7 +93,7 @@ float RtBP::doSyncStep(cv::Mat img_bgr, float error, bool doLearn)
     // det features
     const at::Tensor features_batch = features.forward(input_batch);
 
-    printTensorInfo(features_batch,"features_batch");
+    // printTensorInfo(features_batch,"features_batch");
 
     // calc steering
     const at::Tensor steering_batch = torch::relu(steerer.sequ->forward(features_batch));
