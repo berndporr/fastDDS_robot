@@ -7,6 +7,9 @@ void asyncCallback(float v) {
 
 int main(int, char **)
 {
+    fprintf(stderr,"Loading features.\n");
+    MobileNetV2qFeatures features;
+    fprintf(stderr,"Loading RtBP.\n");
     RtBP rtbp;
     cv::Mat img = cv::imread("road.jpg");
     float steering = rtbp.doSyncStep(img,0,true);

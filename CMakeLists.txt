@@ -54,10 +54,13 @@ if(fastdds_FOUND)
 
 endif()
 
+add_executable (test_rt_bp test_rt_bp.cpp)
+
 ###################
 # Torch / RT learner
 add_library(rt_bp STATIC rt_bp.cpp)
-target_link_libraries(rt_bp
+target_link_libraries(test_rt_bp
+  rt_bp
   ${TORCH_LIBRARIES} 
   ${OpenCV_LIBRARIES}
     extension_tensor
@@ -86,10 +89,37 @@ target_link_libraries(rt_bp
     extension_named_data_map
 )
 
-
-add_executable (test_rt_bp test_rt_bp.cpp)
 target_link_libraries(test_rt_bp rt_bp)
 
+add_executable (test_features test_features.cpp)
+target_link_libraries(test_features
+  ${TORCH_LIBRARIES} 
+  ${OpenCV_LIBRARIES}
+    extension_tensor
+    extension_module
+    extension_data_loader
+    extension_flat_tensor
+    executorch
+    executorch_core
+
+    # XNNPACK backend
+    "$<LINK_LIBRARY:WHOLE_ARCHIVE,xnnpack_backend>"
+
+    # XNNPACK dependencies
+    XNNPACK
+
+    xnnpack-microkernels-prod
+
+    pthreadpool
+    extension_threadpool
+
+    quantized_kernels
+    quantized_ops_lib
+    kernels_util_all_deps
+    cpuinfo
+    $<$<OR:$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},aarch64>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},armv7l>>:kleidiai>
+    extension_named_data_map
+)
 
 ##################
 # Main stuff

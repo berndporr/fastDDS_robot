@@ -1,6 +1,52 @@
 #include "rt_bp.h"
 #include <math.h>
 
+#include <torch/torch.h>
+#include <iostream>
+
+void printTensorInfo(const at::Tensor& tensor, const std::string& name = "") {
+    if (!name.empty()) {
+        std::cout << "Tensor: " << name << std::endl;
+    }
+
+    // Shape / Sizes
+    std::cout << "  Sizes: " << tensor.sizes() << std::endl;
+
+    // Number of elements
+    std::cout << "  Numel: " << tensor.numel() << std::endl;
+
+    // Strides
+    std::cout << "  Strides: ";
+    for (auto s : tensor.strides()) std::cout << s << " ";
+    std::cout << std::endl;
+
+    // Device
+    std::cout << "  Device: " << tensor.device() << std::endl;
+
+    // Data type
+    std::cout << "  Dtype: " << tensor.dtype() << std::endl;
+
+    // Requires gradient?
+    std::cout << "  Requires grad: " << std::boolalpha << tensor.requires_grad() << std::endl;
+
+    // Is contiguous?
+    std::cout << "  Is contiguous: " << std::boolalpha << tensor.is_contiguous() << std::endl;
+
+    // Is sparse or quantized
+    std::cout << "  Is sparse: " << std::boolalpha << tensor.is_sparse() << std::endl;
+    std::cout << "  Is quantized: " << std::boolalpha << tensor.is_quantized() << std::endl;
+
+    // Memory layout
+    std::cout << "  Memory format: " << tensor.suggest_memory_format() << std::endl;
+
+    // Optional: print first few values if small
+    if (tensor.numel() <= 20) {
+        std::cout << "  Values: " << tensor << std::endl;
+    }
+
+    std::cout << "---------------------------------" << std::endl;
+}
+
 RtBP::RtBP()
 {
     torch::manual_seed(1);
@@ -39,17 +85,20 @@ bool RtBP::doAsyncStep(cv::Mat img, float error, bool doLearn)
 
 float RtBP::doSyncStep(cv::Mat img_bgr, float error, bool doLearn)
 {
-    auto data = features.preprocess(img_bgr);
+    const at::Tensor data = MobileNetV2qFeatures::preprocess(img_bgr).to(torch::kCPU);
 
     // turn it into a batch
-    const auto input_batch = data.unsqueeze(0);
+    const at::Tensor input_batch = data.unsqueeze(0);
 
     // det features
-    const auto features_batch = features.forward(input_batch);
-    // calc steering
-    const auto steering_batch = torch::relu(steerer.sequ->forward(features_batch));
+    const at::Tensor features_batch = features.forward(input_batch);
 
-    const auto steering_output = steering_batch.squeeze();
+    printTensorInfo(features_batch,"features_batch");
+
+    // calc steering
+    const at::Tensor steering_batch = torch::relu(steerer.sequ->forward(features_batch));
+
+    const at::Tensor steering_output = steering_batch.squeeze();
 
     // do we learn?
     if (doLearn)
