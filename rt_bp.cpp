@@ -39,10 +39,7 @@ void printTensorInfo(const at::Tensor& tensor, const std::string& name = "") {
     // Memory layout
     std::cout << "  Memory format: " << tensor.suggest_memory_format() << std::endl;
 
-    // Optional: print first few values if small
-    if (tensor.numel() <= 20) {
-        std::cout << "  Values: " << tensor << std::endl;
-    }
+    std::cout << "  Values: " << tensor << std::endl;
 
     std::cout << "---------------------------------" << std::endl;
 }
@@ -93,24 +90,27 @@ float RtBP::doSyncStep(cv::Mat img_bgr, float error, bool doLearn)
     // det features
     const at::Tensor features_batch = features.forward(input_batch);
 
-    // printTensorInfo(features_batch,"features_batch");
+//    printTensorInfo(features_batch,"features_batch");
 
     // calc steering
-    const at::Tensor steering_batch = torch::relu(steerer.sequ->forward(features_batch));
+    const at::Tensor steering_batch = torch::atan(steerer.sequ->forward(features_batch));
 
     const at::Tensor steering_output = steering_batch.squeeze();
+
+    printTensorInfo(steering_output);
 
     // do we learn?
     if (doLearn)
     {
         optimizer->zero_grad();
-        torch::Tensor gradient = torch::tensor({error, error});
+        torch::Tensor gradient = torch::tensor({error});
         steering_output.retain_grad();
         steering_output.backward(gradient);
         optimizer->step();
     }
 
     // one dim output tensor
-    auto a = steering_output.accessor<float, 1>();
-    return a[0] - a[1];
+    //auto a = steering_output.accessor<float, 1>();
+    auto a = steering_output.data_ptr<float>()[0];
+    return a;
 }
