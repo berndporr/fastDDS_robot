@@ -47,8 +47,7 @@ void printTensorInfo(const at::Tensor& tensor, const std::string& name = "") {
 RtBP::RtBP()
 {
     torch::manual_seed(1);
-
-    optimizer = std::make_shared<torch::optim::SGD>(steerer.sequ->parameters(), 0);
+    optimizer = std::make_shared<torch::optim::SGD>(steerer->parameters(),0);
 }
 
 RtBP::~RtBP()
@@ -90,27 +89,22 @@ float RtBP::doSyncStep(cv::Mat img_bgr, float error, bool doLearn)
     // det features
     const at::Tensor features_batch = features.forward(input_batch);
 
-//    printTensorInfo(features_batch,"features_batch");
+    printTensorInfo(features_batch,"features_batch");
 
-    // calc steering
-    const at::Tensor steering_batch = torch::atan(steerer.sequ->forward(features_batch));
-
-    const at::Tensor steering_output = steering_batch.squeeze();
-
-    printTensorInfo(steering_output);
+    const at::Tensor phi = steerer->forward(features_batch);
 
     // do we learn?
     if (doLearn)
     {
         optimizer->zero_grad();
         torch::Tensor gradient = torch::tensor({error});
-        steering_output.retain_grad();
-        steering_output.backward(gradient);
+        phi.retain_grad();
+        phi.backward(gradient);
         optimizer->step();
     }
 
     // one dim output tensor
     //auto a = steering_output.accessor<float, 1>();
-    auto a = steering_output.data_ptr<float>()[0];
+    auto a = phi.data_ptr<float>()[0];
     return a;
 }

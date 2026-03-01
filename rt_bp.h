@@ -15,22 +15,41 @@ class RtBP
 public:
 	using AISteeringCallback = std::function<void(float)>;
 
-	struct Steerer : torch::nn::Module
+	struct SteererImpl : torch::nn::Module
 	{
-		const char *classifierModuleName = "Steerer";
-		Steerer()
+		SteererImpl()
 		{
-			auto l1 = torch::nn::Linear(MobileNetV2qFeatures::N_OUTPUT_FEATURES, 2);
-			auto l2 = torch::nn::Linear(2, 1);
-			sequ = torch::nn::Sequential(l1,l2);
-			register_module(classifierModuleName, sequ);
-			torch::nn::init::xavier_normal_(l1->weight,0.0001);
-			torch::nn::init::zeros_(l1->bias);
-			torch::nn::init::xavier_normal_(l2->weight,0.0001);
-			torch::nn::init::zeros_(l2->bias);
+			cell_weights = register_parameter(
+				"cell_weights",
+				torch::randn({1280, 7, 7}));
+
+			cell_bias = register_parameter(
+				"cell_bias",
+				torch::zeros({7, 7}));
+			spatialFc = register_module(
+				"spatial_fc",
+				torch::nn::Linear(49, 1));
+			torch::nn::init::xavier_normal_(cell_weights, 0.0001);
+			torch::nn::init::zeros_(cell_bias);
+			torch::nn::init::xavier_normal_(spatialFc->weight, 0.0001);
+			torch::nn::init::zeros_(spatialFc->bias);
 		}
-		torch::nn::Sequential sequ{nullptr};
+		torch::Tensor forward(torch::Tensor x)
+		{
+			auto cell_scores = (x * cell_weights.unsqueeze(0)).sum(1) + cell_bias.unsqueeze(0);
+			cell_scores = torch::atan(cell_scores);
+			auto B = cell_scores.size(0);
+			// [B, 7, 7] → [B, 49]
+			auto flat = cell_scores.view({B, 49});
+			// Linear(49 → 1)
+			torch::Tensor out = spatialFc->forward(flat);
+			return out;
+		}
+		torch::Tensor cell_weights; // [1280, 7, 7]
+		torch::Tensor cell_bias;	// [7, 7]
+		std::shared_ptr<torch::nn::LinearImpl> spatialFc;
 	};
+	TORCH_MODULE(Steerer);
 
 	void setLearningRate(float mu)
 	{
