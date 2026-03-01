@@ -36,8 +36,8 @@ public:
 		}
 		torch::Tensor forward(torch::Tensor x)
 		{
-			printTensorInfo(x,"x");
-			printTensorInfo(cell_weights.unsqueeze(0),"cell_weights");
+			printTensorInfo(x, "x");
+			printTensorInfo(cell_weights.unsqueeze(0), "cell_weights");
 			auto cell_scores = (x * cell_weights.unsqueeze(0)).sum(1) + cell_bias.unsqueeze(0);
 			cell_scores = torch::atan(cell_scores);
 			auto B = cell_scores.size(0);
@@ -70,7 +70,7 @@ public:
 
 	AISteeringCallback aiSteeringCallback;
 
-	static void printTensorInfo(const at::Tensor &tensor, const std::string &name = "")
+	static void printTensorInfo(const at::Tensor &tensor, const std::string &name = "", bool values = false)
 	{
 		if (!name.empty())
 		{
@@ -108,7 +108,8 @@ public:
 		// Memory layout
 		std::cout << "  Memory format: " << tensor.suggest_memory_format() << std::endl;
 
-		std::cout << "  Values: " << tensor << std::endl;
+		if (values)
+			std::cout << "  Values: " << tensor << std::endl;
 
 		std::cout << "---------------------------------" << std::endl;
 	}

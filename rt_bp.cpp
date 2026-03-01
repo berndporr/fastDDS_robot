@@ -51,7 +51,9 @@ float RtBP::doSyncStep(cv::Mat img_bgr, float error, bool doLearn)
 
     printTensorInfo(features_batch,"features_batch");
 
-    const at::Tensor phi = steerer->forward(features_batch);
+    at::Tensor phi = steerer->forward(features_batch);
+
+    phi = phi.squeeze();
 
     // do we learn?
     if (doLearn)
