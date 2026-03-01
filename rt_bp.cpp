@@ -4,46 +4,6 @@
 #include <torch/torch.h>
 #include <iostream>
 
-void printTensorInfo(const at::Tensor& tensor, const std::string& name = "") {
-    if (!name.empty()) {
-        std::cout << "Tensor: " << name << std::endl;
-    }
-
-    // Shape / Sizes
-    std::cout << "  Sizes: " << tensor.sizes() << std::endl;
-
-    // Number of elements
-    std::cout << "  Numel: " << tensor.numel() << std::endl;
-
-    // Strides
-    std::cout << "  Strides: ";
-    for (auto s : tensor.strides()) std::cout << s << " ";
-    std::cout << std::endl;
-
-    // Device
-    std::cout << "  Device: " << tensor.device() << std::endl;
-
-    // Data type
-    std::cout << "  Dtype: " << tensor.dtype() << std::endl;
-
-    // Requires gradient?
-    std::cout << "  Requires grad: " << std::boolalpha << tensor.requires_grad() << std::endl;
-
-    // Is contiguous?
-    std::cout << "  Is contiguous: " << std::boolalpha << tensor.is_contiguous() << std::endl;
-
-    // Is sparse or quantized
-    std::cout << "  Is sparse: " << std::boolalpha << tensor.is_sparse() << std::endl;
-    std::cout << "  Is quantized: " << std::boolalpha << tensor.is_quantized() << std::endl;
-
-    // Memory layout
-    std::cout << "  Memory format: " << tensor.suggest_memory_format() << std::endl;
-
-    std::cout << "  Values: " << tensor << std::endl;
-
-    std::cout << "---------------------------------" << std::endl;
-}
-
 RtBP::RtBP()
 {
     torch::manual_seed(1);
