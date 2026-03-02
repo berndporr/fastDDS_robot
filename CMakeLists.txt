@@ -95,6 +95,14 @@ target_link_libraries(test_rt_bp
   ${EXECUTORCH_LINK_LIBS}
   )
 
+################
+# Tests steering
+add_executable (test_steering test_steering.cpp)
+target_link_libraries(test_steering
+  rt_bp
+  ${EXECUTORCH_LINK_LIBS}
+  )
+
 ########################
 # Tests loading features
 add_executable (test_features test_features.cpp)

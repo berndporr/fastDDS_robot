@@ -36,8 +36,8 @@ public:
 		}
 		torch::Tensor forward(torch::Tensor x)
 		{
-			printTensorInfo(x, "x");
-			printTensorInfo(cell_weights.unsqueeze(0), "cell_weights");
+//			printTensorInfo(x, "x");
+//			printTensorInfo(cell_weights.unsqueeze(0), "cell_weights");
 			auto cell_scores = (x * cell_weights.unsqueeze(0)).sum(1) + cell_bias.unsqueeze(0);
 			cell_scores = torch::atan(cell_scores);
 			auto B = cell_scores.size(0);
@@ -65,8 +65,8 @@ public:
 
 	virtual ~RtBP();
 
-	virtual float doSyncStep(cv::Mat img, float error, bool doLearn);
-	virtual bool doAsyncStep(cv::Mat img, float error, bool doLearn);
+	virtual float doSyncStep(cv::Mat img, float des_phi, bool doLearn);
+	virtual bool doAsyncStep(cv::Mat img, float des_phi, bool doLearn);
 
 	AISteeringCallback aiSteeringCallback;
 

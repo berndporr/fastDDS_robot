@@ -39,7 +39,7 @@ bool RtBP::doAsyncStep(cv::Mat img, float error, bool doLearn)
     return true;
 }
 
-float RtBP::doSyncStep(cv::Mat img_bgr, float error, bool doLearn)
+float RtBP::doSyncStep(cv::Mat img_bgr, float desired_phi, bool doLearn)
 {
     const at::Tensor data = MobileNetV2qFeatures::preprocess(img_bgr);
 
@@ -49,24 +49,22 @@ float RtBP::doSyncStep(cv::Mat img_bgr, float error, bool doLearn)
     // det features
     const at::Tensor features_batch = features.forward(input_batch);
 
-    printTensorInfo(features_batch,"features_batch");
+    // printTensorInfo(features_batch,"features_batch");
 
     at::Tensor phi = steerer->forward(features_batch);
 
     phi = phi.squeeze();
+    float actual_phi = phi.data_ptr<float>()[0];
 
     // do we learn?
     if (doLearn)
     {
+        float error = desired_phi - actual_phi;
         optimizer->zero_grad();
-        torch::Tensor gradient = torch::tensor({error});
+        torch::Tensor gradient = torch::tensor({-error});
         phi.retain_grad();
         phi.backward(gradient);
         optimizer->step();
     }
-
-    // one dim output tensor
-    //auto a = steering_output.accessor<float, 1>();
-    auto a = phi.data_ptr<float>()[0];
-    return a;
+    return actual_phi;
 }
