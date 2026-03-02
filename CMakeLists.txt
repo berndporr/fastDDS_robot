@@ -8,7 +8,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 project(rt_bp_robot LANGUAGES CXX)
 include(GNUInstallDirs)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 add_compile_options(-Wall)
 
@@ -122,7 +122,7 @@ if(LIBCAMERA_FOUND)
 
   if(fastdds_FOUND)
     add_executable (rt_bp_robot rt_bp_robot.cpp)
-    target_link_libraries(rt_bp_robot rt_bp alphabot ncurses rt FastDDSMsg ${TORCH_LIBRARIES} ${OpenCV_LIBRARIES} PkgConfig::LIBCAMERA cam2opencv gpiodcxx)
+    target_link_libraries(rt_bp_robot rt_bp alphabot ncurses rt FastDDSMsg ${TORCH_LIBRARIES} ${OpenCV_LIBRARIES} PkgConfig::LIBCAMERA cam2opencv gpiodcxx ${EXECUTORCH_LINK_LIBS})
 
     add_executable (manual_robot manual_robot.cpp)
     target_link_libraries(manual_robot alphabot ncurses rt FastDDSMsg ${OpenCV_LIBRARIES} PkgConfig::LIBCAMERA cam2opencv gpiodcxx)

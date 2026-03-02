@@ -18,9 +18,9 @@ int main(int, char **)
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < n; i++)
     {
-        float err = (float)i / (float)n - 0.5;
-        steering = rtbp.doSyncStep(img, err, true);
-        printf("Err = %f, Steering = %f\n", err, steering);
+        float desired = (float)i / (float)n - 0.5;
+        steering = rtbp.doSyncStep(img, desired, true);
+        printf("Desired = %f, Actual = %f\n", desired, steering);
     }
     printf("\n");
     auto stop = std::chrono::high_resolution_clock::now();

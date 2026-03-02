@@ -10,7 +10,7 @@ constexpr int missedFramesRowNo = 5;
 constexpr int infoRowNo = 7;
 constexpr int eventRowNo = 9;
 
-constexpr float learningRate = 0.005;
+constexpr float learningRate = 5;
 
 // callback every 100ms
 class DisplaySensorCallback : public AlphaBot::BatteryCallback
@@ -92,7 +92,7 @@ struct CameraCallbackAIlogic : Libcam2OpenCV::Callback
 			fprintf(logger, "%f %f %f\n", currentError, steeringLogger, nnSteering);
 		if (rtbp)
 		{
-			bool m = rtbp->doAsyncStep(frame, currentError, doLearn);
+			bool m = rtbp->doAsyncStep(frame, manualSteering, doLearn);
 			if (!m)
 			{
 				nMissedFrames++;
@@ -159,7 +159,7 @@ int main(int, char **)
 	    if (cameraCallbackAIlogic.autonomous) {
 		mvaddstr(infoRowNo, 0, "Autonomous                            ");
 	    } else {
-		mvaddstr(infoRowNo, 0, "Manual                                ");		    
+		mvaddstr(infoRowNo, 0, "Manual                                ");
 	    } });
 
 	camera.registerCallback(&cameraCallbackAIlogic);
