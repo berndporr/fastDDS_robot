@@ -10,13 +10,13 @@ constexpr int missedFramesRowNo = 5;
 constexpr int infoRowNo = 7;
 constexpr int eventRowNo = 9;
 
-constexpr float learningRate = 5;
+constexpr float learningRate = 0.01;
 
 // callback every 100ms
 class DisplaySensorCallback : public AlphaBot::BatteryCallback
 {
 public:
-	virtual void hasBatteryVoltage(float v)
+    virtual void hasBatteryVoltage(float v)
 	{
 		char tmp[256];
 		sprintf(tmp,
