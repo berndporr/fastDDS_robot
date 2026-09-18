@@ -89,7 +89,7 @@ int main(int, char **)
 	initscr();
 	noecho();
 	clear();
-	mvaddstr(0, 0, "SPACE=toggle auto/manual, ESC=end");
+	mvaddstr(0, 0, "fastDDS Racer, ESC=end");
 	refresh();
 	bool running = true;
 	while (running)

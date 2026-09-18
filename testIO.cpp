@@ -7,6 +7,12 @@ int running = 1;
 int main(int, char **)
 {
 	ZetaBot zetabot;
+	try {
+		zetabot.start();
+	} catch (const char* tmp) {
+		fprintf(stderr,"\n%s\n",tmp);
+		abort();
+	}
 	initscr();
 	noecho();
 	clear();
