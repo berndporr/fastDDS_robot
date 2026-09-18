@@ -3,12 +3,7 @@
 #include <ncurses.h>
 #include <iostream>
 
-constexpr int batteryRowNo = 3;
-constexpr int missedFramesRowNo = 5;
 constexpr int infoRowNo = 7;
-constexpr int eventRowNo = 9;
-
-constexpr float learningRate = 0.05;
 
 struct RobotController
 {
@@ -67,14 +62,14 @@ int main(int, char **)
 		robotController.setSteering(s);
 		char tmp[256];
 		sprintf(tmp,"Steering: %f",s);
-		mvaddstr(missedFramesRowNo, 0, tmp);
+		mvaddstr(infoRowNo, 0, tmp);
 	    });
 	mysub.registerThrottleCallback([&](float t)
 								   {
 		robotController.setThrottle(t);
 		char tmp[256];
 		sprintf(tmp,"Throttle: %f",t);
-		mvaddstr(missedFramesRowNo, 0, tmp);
+		mvaddstr(infoRowNo, 0, tmp);
 	    });
 
 
@@ -89,7 +84,7 @@ int main(int, char **)
 	initscr();
 	noecho();
 	clear();
-	mvaddstr(0, 0, "fastDDS Racer, ESC=end");
+	mvaddstr(0, 0, "fastDDS Robot, ESC=end");
 	refresh();
 	bool running = true;
 	while (running)

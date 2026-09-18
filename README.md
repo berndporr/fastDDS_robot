@@ -22,7 +22,7 @@ The steering wheel runs under Ubuntu and is in [steering_wheel](steering_wheel).
 
 On the Ubuntu system run `./steering wheel`.
 
-On the robot run: `./rt_bp_robot`.
+On the robot run: `./fastDDSrobot`.
 
 ## Credit
 
