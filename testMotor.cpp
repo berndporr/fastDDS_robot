@@ -1,4 +1,4 @@
-#include "alphabot.h"
+#include "zetabot.h"
 #include <unistd.h>
 #include <cstdio>
 #include <stdlib.h>
@@ -7,9 +7,9 @@ int running = 1;
 
 int main(int, char **)
 {
-        AlphaBot alphabot;
+        ZetaBot zetabot;
 	try {
-		alphabot.start();
+		zetabot.start();
 	} catch (const char* tmp) {
 		fprintf(stderr,"\n%s\n",tmp);
 		abort();
@@ -24,16 +24,16 @@ int main(int, char **)
 		} else {
 			l = l - d;
 		}
-		alphabot.setLeftWheelSpeed(l);
+		zetabot.setLeftWheelSpeed(l);
 		usleep(100000);
 		if (i < 40) {
 			r = r + d;
 		} else {
 			r = r - d;
 		}
-		alphabot.setRightWheelSpeed(r);
+		zetabot.setRightWheelSpeed(r);
 		usleep(100000);
 		printf(" L = %f \t R= %f\n",l,r);
         }
-        alphabot.stop();
+        zetabot.stop();
 }

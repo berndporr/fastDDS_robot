@@ -16,48 +16,14 @@ find_package (Curses)
 
 find_package(fastcdr REQUIRED)
 find_package(fastdds QUIET)
-find_package(Torch REQUIRED)
-find_package(OpenCV REQUIRED)
-pkg_check_modules(LIBCAMERA IMPORTED_TARGET libcamera)
-
 
 message(STATUS "OpenCV version: ${OpenCV_VERSION}")
 message(STATUS "OpenCV include path: ${OpenCV_INCLUDE_DIRS}")
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${TORCH_INCLUDE_DIRS})
-include_directories(${OpenCV_INCLUDE_DIRS})
 
 include(GNUInstallDirs)
-
-set(EXECUTORCH_LINK_LIBS 
-  ${TORCH_LIBRARIES} 
-  ${OpenCV_LIBRARIES}
-    extension_tensor
-    extension_module
-    extension_data_loader
-    extension_flat_tensor
-    executorch
-    executorch_core
-
-    # XNNPACK backend
-    "$<LINK_LIBRARY:WHOLE_ARCHIVE,xnnpack_backend>"
-
-    # XNNPACK dependencies
-    XNNPACK
-
-    xnnpack-microkernels-prod
-
-    pthreadpool
-    extension_threadpool
-
-    quantized_kernels
-    quantized_ops_lib
-    kernels_util_all_deps
-    cpuinfo
-    $<$<OR:$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},aarch64>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},armv7l>>:kleidiai>
-    extension_named_data_map
-)
 
 ###########
 # DDS
@@ -83,55 +49,16 @@ if(fastdds_FOUND)
 
 endif()
 
-############################
-# Torch / RT learner library
-add_library(rt_bp STATIC rt_bp.cpp)
-
-################
-# Tests learning
-add_executable (test_rt_bp test_rt_bp.cpp)
-target_link_libraries(test_rt_bp
-  rt_bp
-  ${EXECUTORCH_LINK_LIBS}
-  )
-
-################
-# Tests steering
-add_executable (test_steering test_steering.cpp)
-target_link_libraries(test_steering
-  rt_bp
-  ${EXECUTORCH_LINK_LIBS}
-  )
-
-########################
-# Tests loading features
-add_executable (test_features test_features.cpp)
-target_link_libraries(test_features 
-  ${EXECUTORCH_LINK_LIBS}
-)
-
-
 ##################
 # Main stuff
 
 
-if(LIBCAMERA_FOUND)
-  message(STATUS "libcamera found — building RPI stuff")
-  include_directories(${LIBCAMERA_INCLUDE_DIRS})
-  add_compile_definitions(HAVE_LIBCAMERA)
-
-  if(fastdds_FOUND)
+if(fastdds_FOUND)
     add_executable (rt_bp_robot rt_bp_robot.cpp)
-    target_link_libraries(rt_bp_robot rt_bp alphabot ncurses rt FastDDSMsg ${TORCH_LIBRARIES} ${OpenCV_LIBRARIES} PkgConfig::LIBCAMERA cam2opencv gpiodcxx ${EXECUTORCH_LINK_LIBS})
-
-    add_executable (manual_robot manual_robot.cpp)
-    target_link_libraries(manual_robot alphabot ncurses rt FastDDSMsg ${OpenCV_LIBRARIES} PkgConfig::LIBCAMERA cam2opencv gpiodcxx)
-  endif()
-
-  add_executable (testIO testIO.cpp)
-  target_link_libraries(testIO alphabot ncurses rt gpiodcxx)
-  add_executable (testMotor testMotor.cpp)
-  target_link_libraries(testMotor alphabot ncurses rt gpiodcxx)
-else()
-  message(STATUS "libcamera not found — disabling rt_bp_robot")
+    target_link_libraries(rt_bp_robot zetabot ncurses rt FastDDSMsg)
 endif()
+
+add_executable (testIO testIO.cpp)
+target_link_libraries(testIO zetabot ncurses rt gpiodcxx)
+add_executable (testMotor testMotor.cpp)
+target_link_libraries(testMotor zetabot ncurses rt gpiodcxx)
