@@ -15,13 +15,13 @@ struct RobotController
             r = 0;
         if (reverse)
         {
-            zetabot.setLeftWheelSpeed (-speed + steering);
-            zetabot.setRightWheelSpeed (-speed - steering);
+            zetabot.setLeftWheelSpeed (-speed + steering * speed);
+            zetabot.setRightWheelSpeed (-speed - steering * speed);
         }
         else
         {
-            zetabot.setLeftWheelSpeed (speed + steering);
-            zetabot.setRightWheelSpeed (speed - steering);
+            zetabot.setLeftWheelSpeed (speed + steering * speed);
+            zetabot.setRightWheelSpeed (speed - steering * speed);
         }
     }
 
@@ -57,25 +57,12 @@ struct InfoScreen
         initscr ();
         noecho ();
         clear ();
-        mvaddstr (0, 0, "fastDDS Robot, ESC=end");
+        mvaddstr (0, 0, "fastDDS Robot. Press any key to end.");
         refresh ();
-        printSteering(0);
-        printThrottle(0);
-        bool running = true;
-        while (running)
-        {
-            // blocking so that the main program sleeps here
-            int ch = getchar ();
-            switch (ch)
-            {
-            case 27:
-                running = false;
-                break;
-
-            default:
-                break;
-            }
-        }
+        printSteering (0);
+        printThrottle (0);
+        // sleeping till a key is pressed.
+        getchar ();
         endwin ();
     }
     void printSteering (float s)
@@ -122,8 +109,8 @@ int main (int, char **)
     robotController.setThrottle (0);
 
     // sleeps till the user presses ESC
-    infoScreen.run();
-    
+    infoScreen.run ();
+
     // stopping the robot
     robotController.zetabot.stop ();
 }
