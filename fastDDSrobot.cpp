@@ -3,8 +3,6 @@
 #include <iostream>
 #include <ncurses.h>
 
-constexpr int infoRowNo = 7;
-
 struct RobotController
 {
     void send2motors ()
@@ -45,10 +43,62 @@ struct RobotController
     ZetaBot zetabot;
 };
 
+struct InfoScreen
+{
+    static constexpr int steeringRowNo = 7;
+    static constexpr int throttleRowNo = 9;
+
+    /**
+     * Inits the info screen.
+     * Sleeping till the user presses ESC.
+     **/
+    void run ()
+    {
+        initscr ();
+        noecho ();
+        clear ();
+        mvaddstr (0, 0, "fastDDS Robot, ESC=end");
+        refresh ();
+        printSteering(0);
+        printThrottle(0);
+        bool running = true;
+        while (running)
+        {
+            // blocking so that the main program sleeps here
+            int ch = getchar ();
+            switch (ch)
+            {
+            case 27:
+                running = false;
+                break;
+
+            default:
+                break;
+            }
+        }
+        endwin ();
+    }
+    void printSteering (float s)
+    {
+        char tmp[256];
+        sprintf (tmp, "Steering: %f", s);
+        mvaddstr (steeringRowNo, 0, tmp);
+        refresh ();
+    }
+    void printThrottle (float t)
+    {
+        char tmp[256];
+        sprintf (tmp, "Throttle: %f", t);
+        mvaddstr (throttleRowNo, 0, tmp);
+        refresh ();
+    }
+};
+
 int main (int, char **)
 {
     RobotSubscriber mysub;
     RobotController robotController;
+    InfoScreen infoScreen;
 
     ////////////////////////////////////////////////////
     // Init
@@ -59,15 +109,11 @@ int main (int, char **)
     }
     mysub.registerSteeringCallback ([&] (float s) {
         robotController.setSteering (s);
-        char tmp[256];
-        sprintf (tmp, "Steering: %f", s);
-        mvaddstr (infoRowNo, 0, tmp);
+        infoScreen.printSteering (s);
     });
     mysub.registerThrottleCallback ([&] (float t) {
         robotController.setThrottle (t);
-        char tmp[256];
-        sprintf (tmp, "Throttle: %f", t);
-        mvaddstr (infoRowNo, 0, tmp);
+        infoScreen.printThrottle (t);
     });
 
     robotController.zetabot.start ();
@@ -75,29 +121,9 @@ int main (int, char **)
     robotController.setSteering (0);
     robotController.setThrottle (0);
 
-    /////////////////////////////////////////////////////////
-    // main display loop. This is using _blocking_ getchar so
-    // everything realtime is in callbacks defined above!
-    initscr ();
-    noecho ();
-    clear ();
-    mvaddstr (0, 0, "fastDDS Robot, ESC=end");
-    refresh ();
-    bool running = true;
-    while (running)
-    {
-        // blocking so that the main program sleeps here
-        int ch = getchar ();
-        switch (ch)
-        {
-        case 27:
-            running = false;
-            break;
-
-        default:
-            break;
-        }
-    }
+    // sleeps till the user presses ESC
+    infoScreen.run();
+    
+    // stopping the robot
     robotController.zetabot.stop ();
-    endwin ();
 }
